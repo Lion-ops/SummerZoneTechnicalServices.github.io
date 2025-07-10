@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summer Zone Invoice Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .watermark {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.05;
+      z-index: 0;
+      width: 500px;
+    }
+    .header, .footer {
+      text-align: center;
+      color: #023047;
+    }
+    .company-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .invoice-form {
+      z-index: 1;
+      position: relative;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #e6f0f5;
+    }
+    .footer {
+      font-size: 0.9em;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    .btn-add {
+      background-color: #00A859;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .logo {
+      max-width: 150px;
+      display: block;
+      margin: 10px auto;
+    }
+    .btn-pdf {
+      background-color: #003366;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="invoice">
+  <img src="Summer%20zone%20technical%20services%20letter%20head.jpg" class="watermark" alt="Watermark">
+
+  <div class="company-info">
+    <img src="SUMMER%20ZONE%20LOGO.JPEG_page-0001.jpg" class="logo" alt="Company Logo">
+    <h2 style="color:#FF6F00">SUMMER ZONE</h2>
+    <h3 style="color:#003366">TECHNICAL SERVICES. LTD</h3>
+    <p>Kabusu Masaka Road, Nalukolongo, Plot 582</p>
+    <p>P.O.Box 175168 Kampala GPO Masaka road - Uganda</p>
+    <p>Email: summerzonesolar@gmail.com</p>
+    <p>Tel: +256 772081511 / +256 708128621</p>
+  </div>
+
+  <div class="invoice-form">
+    <label for="type">Invoice Type:</label>
+    <select id="type">
+      <option>Proforma Invoice</option>
+      <option>Tax Invoice</option>
+    </select>
+
+    <label for="currency">Currency:</label>
+    <select id="currency">
+      <option value="UGX">UGX</option>
+      <option value="USD">USD</option>
+    </select>
+
+    <table id="invoice-items">
+      <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Unit Cost</th>
+        <th>Total</th>
+      </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
+    <button class="btn-add" onclick="addRow()">Add Item</button>
+
+    <label for="subtotal">Subtotal:</label>
+    <input type="text" id="subtotal" readonly>
+
+    <label for="tax">VAT (18%):</label>
+    <input type="text" id="tax" readonly>
+
+    <label for="total">Total:</label>
+    <input type="text" id="total" readonly>
+
+    <button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
+  </div>
+
+  <div class="footer">
+    Home and commercial solar systems, solar water pumping systems, irrigation systems, office backup systems, CCTV cameras.
+  </div>
+</div>
+
+<!-- Include html2pdf.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  function addRow() {
+    const tbody = document.querySelector("#invoice-items tbody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><input type="text" placeholder="Item"></td>
+      <td><input type="number" placeholder="Quantity" oninput="calculateTotal()"></td>
+      <td><input type="number" placeholder="Unit Cost" oninput="calculateTotal()"></td>
+      <td><input type="text" readonly></td>
+    `;
+    tbody.appendChild(row);
+  }
+
+  function calculateTotal() {
+    const rows = document.querySelectorAll("#invoice-items tbody tr");
+    let subtotal = 0;
+    rows.forEach(row => {
+      const qty = parseFloat(row.cells[1].querySelector("input").value) || 0;
+      const cost = parseFloat(row.cells[2].querySelector("input").value) || 0;
+      const total = qty * cost;
+      row.cells[3].querySelector("input").value = total.toFixed(2);
+      subtotal += total;
+    });
+    const tax = subtotal * 0.18;
+    const total = subtotal + tax;
+    document.getElementById("subtotal").value = subtotal.toFixed(2);
+    document.getElementById("tax").value = tax.toFixed(2);
+    document.getElementById("total").value = total.toFixed(2);
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById("invoice");
+    const opt = {
+      margin: 0.5,
+      filename: `invoice_${new Date().toISOString().slice(0,10)}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().from(element).set(opt).save();
+  }
+</script>
+</body>
+</html>
