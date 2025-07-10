@@ -19,22 +19,13 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       position: relative;
     }
-    .watermark {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      opacity: 0.05;
-      z-index: 0;
-      width: 500px;
-    }
     .header, .footer {
       text-align: center;
       color: #023047;
     }
     .company-info {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .invoice-form {
       z-index: 1;
@@ -43,16 +34,17 @@
     label, select, input, button {
       display: block;
       width: 100%;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 6px;
+      font-size: 14px;
     }
     th {
       background-color: #e6f0f5;
@@ -61,17 +53,17 @@
       font-size: 0.9em;
       color: #666;
       border-top: 1px solid #ddd;
-      padding-top: 10px;
+      padding-top: 8px;
     }
     .btn-add {
       background-color: #00A859;
       color: #fff;
       border: none;
-      padding: 10px;
+      padding: 8px;
       cursor: pointer;
     }
     .logo {
-      max-width: 150px;
+      max-width: 120px;
       display: block;
       margin: 10px auto;
     }
@@ -81,16 +73,14 @@
       padding: 10px;
       border: none;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 8px;
     }
   </style>
 </head>
 <body>
 <div class="container" id="invoice">
-  <img src="Summer%20zone%20technical%20services%20letter%20head.jpg" class="watermark" alt="Watermark">
-
   <div class="company-info">
-    <img src="SUMMER%20ZONE%20LOGO.JPEG_page-0001.jpg" class="logo" alt="Company Logo">
+    <img src="SUMMER ZONE LOGO.JPEG_page-0001.jpg" class="logo" alt="Company Logo">
     <h2 style="color:#FF6F00">SUMMER ZONE</h2>
     <h3 style="color:#003366">TECHNICAL SERVICES. LTD</h3>
     <p>Kabusu Masaka Road, Nalukolongo, Plot 582</p>
@@ -100,6 +90,12 @@
   </div>
 
   <div class="invoice-form">
+    <label for="invoice-number">Invoice Number:</label>
+    <input type="text" id="invoice-number" readonly>
+
+    <label for="invoice-date">Invoice Date:</label>
+    <input type="text" id="invoice-date" readonly>
+
     <label for="type">Invoice Type:</label>
     <select id="type">
       <option>Proforma Invoice</option>
@@ -144,7 +140,6 @@
   </div>
 </div>
 
-<!-- Include html2pdf.js library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   function addRow() {
@@ -176,16 +171,33 @@
     document.getElementById("total").value = total.toFixed(2);
   }
 
+  function generateInvoiceNumber() {
+    const year = new Date().getFullYear().toString().slice(-2);
+    const unique = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    return `INV-${unique}/${year}`;
+  }
+
+  function setInvoiceMetadata() {
+    document.getElementById("invoice-number").value = generateInvoiceNumber();
+    const today = new Date();
+    document.getElementById("invoice-date").value = today.toISOString().split('T')[0];
+  }
+
   function downloadPDF() {
     const element = document.getElementById("invoice");
     const opt = {
-      margin: 0.5,
+      margin: 0.3,
       filename: `invoice_${new Date().toISOString().slice(0,10)}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+      pagebreak: { avoid: 'tr' }
     };
     html2pdf().from(element).set(opt).save();
+  }
+
+  window.onload = function() {
+    setInvoiceMetadata();
   }
 </script>
 </body>
